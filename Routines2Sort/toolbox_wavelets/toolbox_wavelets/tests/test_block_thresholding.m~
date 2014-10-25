@@ -1,0 +1,52 @@
+% test for block thresholding
+
+name = 'peppers-bw';
+name = 'boat';
+n = 256;
+
+M0 = load_image(name);
+M0 = rescale( crop(M0,n), .05,.95 );
+
+
+%% add some noise
+randn('state', 123456);
+W = randn(n);
+ptarget = 16; % boat
+ptarget = 22; % boat
+sigma = adjust_psnr(W,ptarget,M0);
+M = M0 + sigma*W;
+
+
+
+%% wavelets parameters
+Jmax = log2(n)-1;
+Jmin = 3;
+
+options.wavelet_type = 'biorthogonal';
+options.decomp_type = 'quad';
+options.wavelet_vm = 4;
+options.ti = 0;
+options.block_size = 4;
+
+if 0
+MW = perform_wavelet_transform(M, Jmin, +1, options);
+MWT = perform_thresholding(MW,T,thresh,options);
+Mwav = perform_wavelet_transform(MWT, Jmin, -1, options);
+end
+
+
+options.thresh = 'hard';
+[T,Mhard,pval,Tlist,err] = compute_best_threshold('waveortho', M, M0, sigma, options);
+options.thresh = 'block';
+[T,Mblock,pval,Tlist,err] = compute_best_threshold('waveortho', M, M0, sigma, options);
+
+pnoisy =    snr(M0,M);
+pblock =      snr(M0,Mwav);
+phard =      snr(M0,Mhard);
+
+lgd = { ['Noisy, snr=' num2str(pnoisy)], ...
+        ['Wavelets, snr=' num2str(pwav)] };
+imageplot({clamp(M) clamp(Mwav)}, lgd);
+
+disp(['SNR=' num2str(pwav)]);
+
