@@ -47,13 +47,17 @@ shift=0.0; %0.3
 
 idx=x>xin(1) & x<xin(2);
 
-xnew=[ones(size(x(idx))) x(idx)];
-[b,berr]=regress(y(idx),xnew);
+% xnew=[ones(size(x(idx))) x(idx)];
+xnew=[ones(size(x(idx))) log10(x(idx))];
+% [b,berr]=regress(y(idx),xnew);
+[b,berr]=regress(log10(y(idx)),xnew);
 
 x1=xin(1):abs(xin(2)-xin(1))/10:xin(2);
-y1=b(2).*x1 + b(1);
+% y1=b(2).*x1 + b(1);
+y1=(10^(b(1)+shift)).*(x1.^b(2));
 hold on
-plot(x1,y1+shift,'r')
+% plot(x1,y1+shift,'r')
+loglog(x1,y1,'r')
 
 % intercept=b(1);
 slope=b(2);
