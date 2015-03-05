@@ -269,8 +269,9 @@ data=test00_u00-test00_b00; clear test00_b00 test00_u00;
 dt=1/1536; 
 nx=1536; ny=1536; nz=128;
 
-[N,D]=rat(logspace(log10(0.5),0,10));
-N=fliplr(N(2:end-1)); D=fliplr(D(2:end-1));
+% % Stuff to do with resampling so we can get better resolution 
+% [N,D]=rat(logspace(log10(0.5),0,10));
+% N=fliplr(N(2:end-1)); D=fliplr(D(2:end-1));
 
 % [nx*(ny/32)]*(nz/32)
 
@@ -303,11 +304,43 @@ dt=dt*resamplefac(m)
 xnew=1:resamplefac(m):73728;
 
 ynew=interp1([1:1:73728],data,xnew,'spline');
-%%
+%
 plot([1:1:73728],data(:,1),'.-b');
 hold on
 plot(xnew,ynew(:,1),'.r')
 
+%% Removal of fluctuations in the intermittency study
+
+clear all; close all;
+
+% % With
+load test00_b00.366_slyces_perp;
+load test00_u00.366_slyces_perp;
+
+
+% Without
+% load test00_b00.305_slyces_perp;
+% load test00_u00.305_slyces_perp;
+
+% Calculate the Elsasser variable
+data=test00_u00+test00_b00; clear test00_b00 test00_u00;
+
+% data=test00_b00; clear test00_b00
+
+dt=1/1536; 
+nx=1536; ny=1536; nz=128;
+
+[nx*(ny/32)]*(nz/32)
+
+% Calculate magnitude of Z_plus
+data=sqrt(data(:,1).*data(:,1)+data(:,2).*data(:,2)+data(:,3).*data(:,3));
+
+% data=data(:,4);
+
+% Only one slice otherwise uncomment this
+data=reshape(data,[],nz/32);
+
+data=data(:,1);
 
 %% Set parameters needed for UDWT
 
@@ -345,7 +378,7 @@ pads=(2^(nextpow2(samplelength))) - samplelength;   % for edge extension
     
 coefsTot=cell(1,nlevel);
 
-for m=1:1:(nz/32)
+for m=1:1:1   %(nz/32)
 
 y=[data(1,m).*ones(pads/2,1); data(:,m); data(end,m).*ones(pads/2,1)];
 
@@ -418,12 +451,14 @@ clear('coefs','j');
 
 end
 
-clear('Hps','Lps'); clear('pads'); clear('h_0','h_1');
+clear('Hps','Lps'); clear('pads'); clear('h_0','h_1'); clear ('m');
 
-%% Structure functions
+%% scale to frequency conversion
 
 scale = 2.^(1:nlevel)';
 frequency = scal2frq(scale,wname,dt);
+
+%% Structure functions
 
 [taus,AllMoments]=swfunctions(coefsTot,dt,scale,0);
 
@@ -445,13 +480,14 @@ sfexponents(taus,AllMoments,0,0);
 
 %% PDF
 
-%% Calculate PDFs at dfferent scales for the Price Coastline
+%% Calculate PDFs at dfferent scales 
 
 figure(2); hold on;
 
-for k=3:1:6
+%3 6
+for k=1:1:14
     
-    NormHisto(coefsMinus{1,k},200,0,1,'.-b'); hold on;
+    NormHisto(coefsTot{1,k},200,0,1,'.-b',0); hold on;
 
 end
 
@@ -459,6 +495,8 @@ xlabel('x/\sigma(\tau)');
 ylabel('log_{10} \sigma(\tau) PDF(x,\tau)');
 
 %% Wavelet Power spectra
+
+% declare p
 
 for k = 1:nlevel
 
@@ -470,7 +508,7 @@ end
 % Converting to power/energy spectral density
 p=p.*(dt*2);
 
-    loglog(frequency,p,'b');
+    loglog(frequency,p,'.k');
     grid on
     xlabel('log_{10} frequency (Hz)')
     ylabel('log_{10} PSD (signal units)^{2}Hz^{-1}')
@@ -519,3 +557,77 @@ p=0:0.1:5;
 % zeta_p = p.*(0.9/2) - p.*(3/8) + 1 
 zeta_p=p.*0.666;
 plot(p,zeta_p,'r');
+
+%% Seperation of intermittent and quiescient fluctuations
+
+coefsQuies=cell(1,nlevel);
+coefsIntermit=cell(1,nlevel);
+
+for m=1:1:nlevel
+    
+    coefsQuies{m}=coefsTot{m}(abs(coefsTot{m})<3*nanstd(coefsTot{m}));
+    coefsIntermit{m}=coefsTot{m}(abs(coefsTot{m})>3*nanstd(coefsTot{m}));
+    
+end
+
+clear m;
+
+%% Plot Wavelet PSD for the intermittent fluctuations
+
+for k = 1:nlevel
+
+    cw = coefsIntermit{k}.*coefsIntermit{k};
+    pIntermit(k) = nanmean(cw);
+%     pIntermit(k) = nansum(cw)./(numel(coefsTot{k}(~isnan(coefsTot{k}))));
+    dpIntermit(k) = nanstd(cw);
+    
+end
+
+clear cw k;
+
+% Converting to power/energy spectral density
+pIntermit=pIntermit.*(dt*2);
+
+    loglog(frequency,pIntermit,'.r');
+    grid on
+    xlabel('log_{10} frequency (Hz)')
+    ylabel('log_{10} PSD (signal units)^{2}Hz^{-1}')
+    title(['nr of levels = ',int2str(nlevel),...
+        '   Wavelet is Coiflet2'])
+    
+%% Plot Wavelet PSD for the quiescient fluctuations
+
+for k = 1:nlevel
+
+    cw = coefsQuies{k}.*coefsQuies{k};
+    pQuies(k) = nanmean(cw);
+%     pQuies(k) = nansum(cw)./(numel(coefsTot{k}(~isnan(coefsTot{k}))));
+    
+end
+
+clear cw k;
+
+% Converting to power/energy spectral density
+pQuies=pQuies.*(dt*2);
+
+    loglog(frequency,pQuies,'.b');
+    grid on
+    xlabel('log_{10} frequency (Hz)')
+    ylabel('log_{10} PSD (signal units)^{2}Hz^{-1}')
+    title(['nr of levels = ',int2str(nlevel),...
+        '   Wavelet is Coiflet2'])
+%% plot the component spectra
+
+loglog(frequency,p,'ok'); hold on
+loglog(frequency,pIntermit,'or'); hold on
+loglog(frequency,pQuies,'ob'); hold on
+axis tight
+    
+    
+%% Overplot a standardised Gaussian
+
+x = [-10:.1:10];
+norm = normpdf(x,0,1);
+hold on;
+plot(x,log10(norm),'r')
+
