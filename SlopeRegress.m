@@ -5,7 +5,7 @@ function SlopeRegress(plothandle)
 % File name: SlopeRegress.m
 % Author: Khurom H. Kiyani
 % File created: 14th March 2014
-% Last updated: 16th March 2014
+% Last updated: 22nd March 2015
 % Updated by: Khurom H. Kiyani
 % 
 % Description:
@@ -23,7 +23,8 @@ function SlopeRegress(plothandle)
 % 
 % Notes:
 % ------
-% 1./ Need to recognise and transform accordingly log coordinate axes.
+% 1./ Need to recognise and transform accordingly log coordinate axes. gca
+% and strcomp are needed here. 
 % 2./ Need to use your own regression algorith -- it's fairly easy. This
 % current one is a more complciated linear regression and not a OLS
 % 

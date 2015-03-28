@@ -19,7 +19,7 @@ function [p,frequency,scale,dp,l,coefs] = wspect(y,dt,wname,fitline)
 % perfect.
 % Also note the effect from choices of wavelet bases with few zero moments.
 % Notice that the Haar Wavelet overestimates the PSD especially when the
-% steeper slope is encountered. This si because the Haar has only one zero
+% steeper slope is encountered. This is because the Haar has only one zero
 % moment. This means it can only detect PSD slopes of -3 or higher. To
 % detect a power-law slope of f^-{\beta} one requires a wavelet with
 % M>(\beta - 1)/2

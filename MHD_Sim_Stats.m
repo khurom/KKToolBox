@@ -577,8 +577,8 @@ clear m;
 for k = 1:nlevel
 
     cw = coefsIntermit{k}.*coefsIntermit{k};
-    pIntermit(k) = nanmean(cw);
-%     pIntermit(k) = nansum(cw)./(numel(coefsTot{k}(~isnan(coefsTot{k}))));
+%     pIntermit(k) = nanmean(cw);
+    pIntermit(k) = nansum(cw)./(numel(coefsTot{k}(~isnan(coefsTot{k}))));
     dpIntermit(k) = nanstd(cw);
     
 end
@@ -600,8 +600,8 @@ pIntermit=pIntermit.*(dt*2);
 for k = 1:nlevel
 
     cw = coefsQuies{k}.*coefsQuies{k};
-    pQuies(k) = nanmean(cw);
-%     pQuies(k) = nansum(cw)./(numel(coefsTot{k}(~isnan(coefsTot{k}))));
+%     pQuies(k) = nanmean(cw);
+    pQuies(k) = nansum(cw)./(numel(coefsTot{k}(~isnan(coefsTot{k}))));
     
 end
 

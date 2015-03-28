@@ -63,6 +63,9 @@ errnc=1./(n.*(sqrt(n)));    % Error if plotting log density
 if scalingflag
     
 % % Uncomment the next two lines if you want to get a pdf collapse on \tau
+% % in general collapse on sigma is better as it is something which is
+% calculated from the data and therefore will be better in cattering for
+% the systematic errors in each interval
 %     nc=nc*(tau.^H);
 %     bins=bins./(tau.^H);
     nc=nc*(std_Xin);
