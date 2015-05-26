@@ -9,7 +9,7 @@ function SlopeRegress(arg1,arg2,arg3)
 % Institute: University of Warwick
 % E-mail: k.kiyani@warwick.ac.uk
 % 
-% Last updated: 25th May 2015
+% Last updated: 27th May 2015
 % Updated by: Khurom H. Kiyani
 % 
 % Description:
@@ -41,8 +41,7 @@ function SlopeRegress(arg1,arg2,arg3)
 % Needs the Statistics toolbox for the Quantile function 'tinv'. This is
 % needed to calculate the t-score at which one has 95% confidence intervals
 % for the Student's t-distribution; this is the underlying distribution for
-% the slope and intercept parameters calculated. 'tinv' is a complicated 
-% function which is computed with different sets of approximations.  
+% the slope and intercept parameters calculated.
 % 
 % See also TINV
 
@@ -176,33 +175,55 @@ elseif (strcmp(xAxisScale,'log'))>0 && (strcmp(yAxisScale,'linear'))>0
     semilogx(x1,y1,'r');
     
 end
+
+% -------------------------------------------------------------------------
+% THE FIT ERRORS
 % -------------------------------------------------------------------------
 
-confInt=95;     % confidence interval in percent
+if (exist('tinv.m','file'))==2  % check if 'tinv' (stats toolbox) is 
+                                % present for error estimation
 
-alpha=1-(confInt/100); clear confInt  
+    confInt=95;     % confidence interval in percent
 
-% for two-sided Student's t-distribution with 'length(y)-2' degrees of
-% freedom
+    alpha=1-(confInt/100); clear confInt  
 
-tval=tinv((1-(alpha/2)),length(y)-2);
+    % for two-sided Student's t-distribution with 'length(y)-2' degrees of
+    % freedom
 
-intercept=b(1);
-errintercept=tval*bstderr(1);
+    tval=tinv((1-(alpha/2)),length(y)-2);
 
-slope=b(2);
-errslope=tval*bstderr(2);
+    intercept=b(1);
+    errintercept=tval*bstderr(1);
 
-% Display result on the command
-disp(['Slope=',num2str(slope),' ','+/-',num2str(errslope)]);
-disp(['Intercept=',num2str(intercept),' ','+/-',num2str(errintercept)]);
+    slope=b(2);
+    errslope=tval*bstderr(2);
 
-% Display result on the figure
-annotation('textbox',...
+    % Display result on the command
+    disp(['Slope=',num2str(slope),' ','+/-',num2str(errslope)]);
+    disp(['Intercept=',num2str(intercept),' ','+/-',num2str(errintercept)]);
+
+    % Display result on the figure
+    annotation('textbox',...
     [0.44 0.71 0.22 0.13],'String',{['Slope= ',num2str(slope),' ',...
     '\pm',num2str(errslope)]},...
     'FitBoxToText','off',...
     'LineStyle','none');
+
+else
+    
+    intercept=b(1); slope=b(2);
+    
+    % Display result on the command
+    disp(['Slope=',num2str(slope)]);
+    disp(['Intercept=',num2str(intercept)]);
+    disp('No errors available: requires MATLAB Stats toolbox for function tinv.m');
+    
+    % Display result on the figure
+    annotation('textbox',[0.44 0.71 0.22 0.13],...
+    'String',{['Slope= ',num2str(slope)]},...
+    'FitBoxToText','off','LineStyle','none');
+    
+end
 
 end
 
