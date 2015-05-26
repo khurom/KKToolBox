@@ -57,16 +57,16 @@ era=(2.*log10(exp(1))).*(era./((sqrt(numel(a))).*a));
 
 % subplot(211);
 % errorbar(log10(F(2:end)),log10(a(2:end)),era(2:end),'-k'); hold on;
-h=plot(log10(F(2:end)),log10(a(2:end)),plotoption);
+h=loglog(F(2:end),a(2:end),plotoption);
 % loglog((F(2:end)),(a(2:end)),plotoption);
 % plot((F(2:end)),(a(2:end)),plotoption);
 
-ylabel('log_{10} PSD ((signal units)^{2}Hz^{-1})','FontSize',16);
+ylabel('PSD ((signal units)^{2}Hz^{-1})','FontSize',16);
 
 % subplot(212);
 % errorbar(log10(F(2:end)),zeros((numel(a)-1),1),era(2:end));
 
-xlabel('log_{10} Frequency (Hz)','FontSize',16);
+xlabel('Frequency (Hz)','FontSize',16);
 % title('95% confidence interval error ((signal units)^{2} Hz^{-1})','FontWeight','bold',...
 %     'FontSize',14);
 

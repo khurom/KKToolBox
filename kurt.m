@@ -26,7 +26,7 @@ if displ
     clf
     
     figure(1);
-    plot(log10(scales),(kurt),'.r');
-    xlabel('log_{10}(\tau [secs])'),ylabel('Kurtosis');
+    semilogx(scales,kurt,'.r');
+    xlabel('\tau [secs])',ylabel('Kurtosis');
 
 end

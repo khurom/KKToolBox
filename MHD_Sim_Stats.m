@@ -1,9 +1,4 @@
 
-%% Load data
-
-% cd /media/DATA/Work.SpacePlasma/DataCubes/;
-% cd /media/Extra/DataCubes/;
-cd /home/khurom/Desktop/PROJECT_OF_THE_MILENIUM/Strong/
 
 %% load perp data
 
@@ -37,17 +32,10 @@ clear mwt_perp component;
 
 % Bx_perpA=reshape(bx,512,64,32); % For EMHD 512 cube
 
-Bx_perpA=reshape(bx,1536,192,8);
+Bx_perpA=reshape(bx,1536,1536/8,8);
 
 clear bx;
 
-% Calculate different spatial scales 'l'
-
-base=1.2; maxexp=35;
-
-l=unique(floor(base.^(0:1:maxexp))); 
-
-clear base maxexp;
 
 %% Prepare perp data ONE PERP
 
@@ -65,14 +53,6 @@ clear mwt_perp component;
 % Bx_perpA=reshape(bx,1024,128,64); %Strong EMHD
 
 clear bx;
-
-% Calculate different spatial scales 'l'
-
-base=1.2; maxexp=35;
-
-l=unique(floor(base.^(0:1:maxexp))); 
-
-clear base maxexp;
 
 %% prepare parallel data
 
@@ -95,6 +75,14 @@ clear bx;
 base=1.2; maxexp=23;
 
 l=unique(floor(base.^(0:1:maxexp)));
+
+clear base maxexp;
+
+%% Calculate different spatial scales 'l'
+
+base=1.2; maxexp=35;
+
+l=unique(floor(base.^(0:1:maxexp))); 
 
 clear base maxexp;
 
@@ -213,12 +201,11 @@ clear('m');
 
 %% Exponents zeta(p)
 
-% sfexponents((1/1536).*l,Moments,1,0);
-sfexponents((1/1024).*l,Moments,1,0);
+sfexponents(dt.*l,Moments,1,0);
 
 %% Kurtosis
 
-kurt(Fluctuations,(1/512).*l,1);
+kurt(Fluctuations,dt.*l,1);
 
 %% ****************************************************************
 % WAVELET STUFF
@@ -250,6 +237,45 @@ data=reshape(data,[],nz/32);
 %     spect{k,1}=P'; clear P;
 %     
 % end
+
+%% MHD Strong
+
+clear all; close all;
+
+load test00_b00.007_slyces_perp;
+
+data=test00_b00; clear test00_b00;
+
+dt=1/1024;
+nx=1024; ny=1024; nz=1024;
+
+component=1;    % 1=x, 2=y, 3=z, 4=magnitude
+
+data=data(:,component); clear component
+
+data=reshape(data,[],nz/32);
+
+%% Spectra of all slices
+
+NumberOfSlices=size(data,2);
+
+[F,a,~]=spectro(data(:,1),2^11,dt,'b'); hold on
+
+for m=2:1:NumberOfSlices
+    
+    [F,a1,~]=spectro(data(:,m),2^11,dt,'b');
+    a=a+a1;
+    clear a1;
+    
+end
+
+a=a./NumberOfSlices;
+
+close all; clear m NumberOfSlices
+
+h=loglog((F(2:end)),(a(2:end)),'b'); SlopeRegress(h);
+
+clear h
 
 %% With/Without
 
@@ -524,15 +550,6 @@ totalspec=nansum(sppSpec(:,2:50),2);
 loglog([0:1:768],128.*totalspec,'r');
 loglog([0:1:768],128.*sppSpec(:,1),'k');
 
-%% Spectra of all slices
-
-[F,a1,era]=spectro(data(:,1),2^12,dt,'b'); hold on
-[F,a2,era]=spectro(data(:,2),2^12,dt,'r');
-[F,a3,era]=spectro(data(:,3),2^12,dt,'b');
-[F,a4,era]=spectro(data(:,4),2^12,dt,'r');
-a=(a1+a2+a3+a4)./4;
-loglog((F(2:end)),(a(2:end)),'b');
-
 %% fit nonlinear regression model for the co-dimension parameter estimation
 
 modelfun = @(b,x)x(:,1)/8 + b(1) - b(1)*((1 - (3/(b(1)*4))).^(x(:,1)/2));
@@ -624,10 +641,3 @@ loglog(frequency,pQuies,'ob'); hold on
 axis tight
     
     
-%% Overplot a standardised Gaussian
-
-x = [-10:.1:10];
-norm = normpdf(x,0,1);
-hold on;
-plot(x,log10(norm),'r')
-

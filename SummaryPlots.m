@@ -36,11 +36,14 @@ function [SumPar]=SummaryPlots(Bvec,Particles,Electrons,trendscale)
 % 
 % Additional Notes:
 % -----------------
-% 0./ Don't worry if the data has it's time in datenum format. As long as 
+% 0./ REMEMBER THINGS LIKE BETA ARE CACULATED FROM THE TIME AVERAGE OF
+%     THE INSTANTANEOUS BETA VALUES AND NOT FROM THE AVERAGES OF THE OTHER 
+%     VARIABLES. 
+% 1./ Don't worry if the data has it's time in datenum format. As long as 
 %     the real sampling is in units of seconds everything is ok. 
-% 1./ Add Whisper spectrogram plot.
-% 2./ Add ion spectrogram plot.
-% 3./ Add ion temperature anisotropy Vs. ion plasma beta parallel plot with
+% 2./ Add Whisper spectrogram plot.
+% 3./ Add ion spectrogram plot.
+% 4./ Add ion temperature anisotropy Vs. ion plasma beta parallel plot with
 %     theoretical marginal instability thresholds plotted.
 %**********************************************************************************
 
@@ -231,7 +234,7 @@ xlabel(['Time on ',datestr(Particles(1,1),'dd-mmm-yyyy')], ...
     'FontSize',12); 
 ylabel('T_{i ||}/T_{i \perp}','FontSize',12); datetick('x'); axis tight; 
 
-% % Writing mean summary parameters and their uncertainty out to cell array
+% % Writing mean summary parameters and their uncertainty out to cell array with labels
 % 
 % SumPar=cell(6,3);
 % SumPar{1,1}='Variable'; SumPar{1,2}='Mean'; SumPar{1,3}='PercentageError';
