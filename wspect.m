@@ -24,6 +24,17 @@ function [p,frequency,scale,dp,l,coefs] = wspect(y,dt,wname,fitline)
 % detect a power-law slope of f^-{\beta} one requires a wavelet with
 % M>(\beta - 1)/2
 
+% input check for TSeries objects used by irfu-matlab
+if isa(y,'TSeries')    
+    % if not given, get time resolution from first two points
+    if nargin<2, dt=y.time(2)-y.time(1); end
+    
+    if size(y.data,2)>1, error('Input must be 1-D'); end
+    
+    y=y.data; % get data out of TSeries object
+end
+
+
 if nargin<2, dt = 1; end
 if nargin<3, wname = 'db4'; end
 if nargin<4, fitline = 0; end
